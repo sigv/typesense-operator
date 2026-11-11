@@ -247,6 +247,7 @@ func (r *TypesenseClusterReconciler) buildStatefulSet(ctx context.Context, key c
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: getObjectMeta(ts, &key.Name, podAnnotations),
 				Spec: corev1.PodSpec{
+					AutomountServiceAccountToken:  ptr.To[bool](false),
 					SecurityContext:               ts.Spec.GetPodSecurityContext(),
 					TerminationGracePeriodSeconds: ptr.To[int64](5),
 					ReadinessGates: []corev1.PodReadinessGate{
@@ -438,6 +439,11 @@ func (r *TypesenseClusterReconciler) buildStatefulSet(ctx context.Context, key c
 									Name:      "nodeslist",
 									ReadOnly:  true,
 								},
+								{
+									MountPath: "/var/run/secrets/kubernetes.io/serviceaccount",
+									Name:      "serviceaccount",
+									ReadOnly:  true,
+								},
 							},
 						},
 					},
@@ -461,6 +467,47 @@ func (r *TypesenseClusterReconciler) buildStatefulSet(ctx context.Context, key c
 							VolumeSource: corev1.VolumeSource{
 								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 									ClaimName: "data",
+								},
+							},
+						},
+						{
+							Name: "serviceaccount",
+							VolumeSource: corev1.VolumeSource{
+								Projected: &corev1.ProjectedVolumeSource{
+									Sources: []corev1.VolumeProjection{
+										{
+											ConfigMap: &corev1.ConfigMapProjection{
+												LocalObjectReference: corev1.LocalObjectReference{
+													Name: "kube-root-ca.crt",
+												},
+												Items: []corev1.KeyToPath{
+													{
+														Key:  "ca.crt",
+														Path: "ca.crt",
+													},
+												},
+											},
+										},
+										{
+											DownwardAPI: &corev1.DownwardAPIProjection{
+												Items: []corev1.DownwardAPIVolumeFile{
+													{
+														FieldRef: &corev1.ObjectFieldSelector{
+															APIVersion: "v1",
+															FieldPath:  "metadata.namespace",
+														},
+														Path: "namespace",
+													},
+												},
+											},
+										},
+										{
+											ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+												ExpirationSeconds: ptr.To[int64](3600),
+												Path:              "token",
+											},
+										},
+									},
 								},
 							},
 						},
