@@ -246,7 +246,7 @@ func (r *TypesenseClusterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if cerr != nil {
 			return ctrl.Result{}, cerr
 		}
-		r.Recorder.Eventf(&ts, "Warning", string(cond), toTitle(err.Error()))
+		r.Recorder.Event(&ts, "Warning", string(cond), toTitle(err.Error()))
 	}
 
 	condition, _, err := r.ReconcileQuorum(ctx, &ts, secret, client.ObjectKeyFromObject(sts))
@@ -270,7 +270,7 @@ func (r *TypesenseClusterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if cerr != nil {
 			return ctrl.Result{}, cerr
 		}
-		r.Recorder.Eventf(&ts, "Warning", string(condition), toTitle(erram.Error()))
+		r.Recorder.Event(&ts, "Warning", string(condition), toTitle(erram.Error()))
 
 	} else {
 		if condition != ConditionReasonQuorumReady {
@@ -282,7 +282,7 @@ func (r *TypesenseClusterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 				return ctrl.Result{}, cerr
 			}
 
-			r.Recorder.Eventf(&ts, "Warning", string(condition), toTitle(err.Error()))
+			r.Recorder.Event(&ts, "Warning", string(condition), toTitle(err.Error()))
 		} else {
 			report := ts.Status.Conditions[0].Status != metav1.ConditionTrue
 
@@ -292,7 +292,7 @@ func (r *TypesenseClusterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 
 			if report {
-				r.Recorder.Eventf(&ts, "Normal", string(condition), toTitle("quorum is ready"))
+				r.Recorder.Event(&ts, "Normal", string(condition), toTitle("quorum is ready"))
 			}
 		}
 	}
