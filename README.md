@@ -55,18 +55,22 @@ Container Registry (GHCR):
 
 ```bash
 # Install the Operator from the OCI registry
-helm upgrade --install typesense-operator oci://ghcr.io/akyriako/charts/typesense-operator --version <version> -n typesense-system --create-namespace --reset-values
+helm upgrade --install typesense-operator oci://ghcr.io/akyriako/charts/typesense-operator --version <version> -n typesense-system --create-namespace --reset-values --set controllerManager.manager.image.repository=ghcr.io/akyriako/typesense-operator
 ```
 
 > [!NOTE]
 > Replace `<version>` with the desired chart version.
 
-#### Verify the signature of the OCI chart</summary>
+#### Verify the signatures on Github Container Registry
 
-Charts published to the OCI registry are signed with keyless [cosign](https://docs.sigstore.dev/cosign/) by the release workflow:
+Charts and images published to Github Container Registry are signed with keyless [cosign](https://docs.sigstore.dev/cosign/) by the release workflow:
 
 ```bash
 cosign verify ghcr.io/akyriako/charts/typesense-operator:<version> \
+  --certificate-identity https://github.com/akyriako/typesense-operator/.github/workflows/releases.yaml@refs/heads/main \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+cosign verify ghcr.io/akyriako/typesense-operator:<version> \
   --certificate-identity https://github.com/akyriako/typesense-operator/.github/workflows/releases.yaml@refs/heads/main \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
