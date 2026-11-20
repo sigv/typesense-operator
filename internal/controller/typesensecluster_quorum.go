@@ -342,16 +342,16 @@ func (r *TypesenseClusterReconciler) calculatePodReadinessGate(ctx context.Conte
 	} else {
 		if !health.Ok {
 			if health.ResourceError != nil && (*health.ResourceError == OutOfMemory || *health.ResourceError == OutOfDisk) {
-				conditionReason = nodeNotRecoverable //nolint:ineffassign // TODO enable this path
+				conditionReason = nodeNotRecoverable
 				conditionMessage = fmt.Sprintf("node is failing: %s", string(*health.ResourceError))
-				conditionStatus = v1.ConditionFalse //nolint:ineffassign
+				conditionStatus = v1.ConditionFalse
 
 				err := fmt.Errorf("health check reported a blocking node error on %s: %s", r.getShortName(node.PodName), string(*health.ResourceError))
 				r.logger.Error(err, "quorum cannot be recovered automatically")
+			} else {
+				conditionReason = nodeNotHealthy
+				conditionStatus = v1.ConditionFalse
 			}
-
-			conditionReason = nodeNotHealthy
-			conditionStatus = v1.ConditionFalse
 		}
 	}
 
