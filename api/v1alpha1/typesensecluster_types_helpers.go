@@ -79,15 +79,15 @@ func (s *TypesenseClusterSpec) GetAffinity(labels map[string]string) *corev1.Aff
 }
 
 func (s *TypesenseClusterSpec) GetTopologySpreadConstraints(labels map[string]string) []corev1.TopologySpreadConstraint {
-	tscs := make([]corev1.TopologySpreadConstraint, 0)
+	tscs := make([]corev1.TopologySpreadConstraint, len(s.TopologySpreadConstraints))
 
-	for _, tsc := range s.TopologySpreadConstraints {
+	for i, tsc := range s.TopologySpreadConstraints {
 		if tsc.LabelSelector == nil {
 			tsc.LabelSelector = &metav1.LabelSelector{
 				MatchLabels: cloneLabels(labels),
 			}
 		}
-		tscs = append(tscs, tsc)
+		tscs[i] = tsc
 	}
 	return tscs
 }
