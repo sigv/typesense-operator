@@ -14,7 +14,7 @@ controllerManager:
       readOnlyRootFilesystem: true
     image:
       repository: quay.io/akyriako/typesense-operator
-      tag: 0.5.0-rc.2
+      tag: 0.5.0-rc.sigv.2
     imagePullPolicy: IfNotPresent
     resources:
       limits:
